@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <table>
+        <tbody id="cartTableBody">
+            <tr>
+                <td>Loading your cart...</td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="summarySubtotal">₹0.00</div>
+    <div id="summaryTotal">₹0.00</div>
+    <button id="checkoutBtn" disabled>Checkout</button>
+    <script>
+        const data = {
+            cart_items: [
+                {
+                    cart_id: 4,
+                    quantity: 1,
+                    product_id: 2,
+                    title: 'Potato',
+                    price: 40.0,
+                    max_stock: 20,
+                    product_image: 'e82c23faa7bcbe14.jpg',
+                    unit: 'kg',
+                    farmer_id: 4
+                }
+            ]
+        };
+
+        const tbody = document.getElementById('cartTableBody');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        try {
+            if (data.cart_items.length === 0) {
+                console.log("Empty cart");
+            } else {
+                console.log("Items provided");
+                checkoutBtn.disabled = false;
+                let totalCartPrice = 0;
+
+                tbody.innerHTML = data.cart_items.map(item => {
+                    const itemTotal = item.quantity * item.price;
+                    totalCartPrice += itemTotal;
+
+                    return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="/static/uploads/${item.product_image}" class="rounded me-3 border" style="width: 50px; height: 50px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">${item.title}</h6>
+                                    <span class="text-success small fw-semibold">₹${Number(item.price).toFixed(2)} / ${item.unit}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="text-muted small"><i class="bi bi-shop"></i> Farm ID: ${item.farmer_id}</span></td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border px-3 py-2 fs-6 rounded-pill">${item.quantity}</span>
+                        </td>
+                        <td class="text-end fw-bold">₹${itemTotal.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger shadow-sm rounded-circle" onclick="removeFromCart(${item.cart_id})" title="Remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+
+                document.getElementById('summarySubtotal').innerText = `₹${totalCartPrice.toFixed(2)}`;
+                document.getElementById('summaryTotal').innerText = `₹${totalCartPrice.toFixed(2)}`;
+
+                require('fs').writeFileSync('render_result.html', document.body.innerHTML);
+                console.log("Finished rendering. SUCCESS.");
+            }
+        } catch (e) {
+            console.error("Render failed", e);
+        }
+    </script>
+</body>
+
+</html>

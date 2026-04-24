@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cart Debug</title>
+</head>
+
+<body>
+    <table class="table align-middle mb-0 table-hover">
+        <tbody id="cartTableBody">
+            <tr>
+                <td colspan="5" class="text-center py-5 text-muted">Loading your cart...</td>
+            </tr>
+        </tbody>
+    </table>
+    <span id="summarySubtotal">₹0.00</span>
+    <span id="summaryTotal">₹0.00</span>
+    <button id="checkoutBtn" disabled>Checkout</button>
+
+    <script>
+        const data = {
+            "cart_items": [
+                {
+                    "cart_id": 4,
+                    "farmer_id": 4,
+                    "max_stock": 20,
+                    "price": 40.0,
+                    "product_id": 2,
+                    "product_image": "e82c23faa7bcbe14.jpg",
+                    "quantity": 1,
+                    "subtotal": 40.0,
+                    "title": "Potato",
+                    "unit": "kg"
+                }
+            ],
+            "cart_total": 40.0
+        };
+
+        const tbody = document.getElementById('cartTableBody');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        try {
+            if (data.cart_items.length === 0) {
+                console.log("Empty cart");
+            } else {
+                console.log("Cart has items");
+                checkoutBtn.disabled = false;
+                let totalCartPrice = 0;
+
+                tbody.innerHTML = data.cart_items.map(item => {
+                    const itemTotal = item.quantity * item.price;
+                    totalCartPrice += itemTotal;
+
+                    return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="/static/uploads/${item.product_image}" class="rounded me-3 border" style="width: 50px; height: 50px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">${item.title}</h6>
+                                    <span class="text-success small fw-semibold">₹${Number(item.price).toFixed(2)} / ${item.unit}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="text-muted small"><i class="bi bi-shop"></i> Farm ID: ${item.farmer_id}</span></td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border px-3 py-2 fs-6 rounded-pill">${item.quantity}</span>
+                        </td>
+                        <td class="text-end fw-bold">₹${itemTotal.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger shadow-sm rounded-circle" onclick="removeFromCart(${item.cart_id})" title="Remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+
+                document.getElementById('summarySubtotal').innerText = `₹${totalCartPrice.toFixed(2)}`;
+                document.getElementById('summaryTotal').innerText = `₹${totalCartPrice.toFixed(2)}`;
+                console.log("Render successful!");
+            }
+        } catch (error) {
+            console.error("Cart Loading Error: ", error);
+            document.body.innerHTML += ("Failed to load cart: " + error.message);
+        }
+    </script>
+</body>
+
+</html>
